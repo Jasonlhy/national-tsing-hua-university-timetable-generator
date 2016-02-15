@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+    <title>timetable</title>
+
+
+    <style>
+    .timeslot {
+      background-color: #6495ED;
+    }
+    
+    .collision {
+      background-color: red;
+    }
+    
+    table {
+        width: 100%;
+    }
+
+    table td:first-child {
+        width: 4%;
+    }
+
+    table td:not(:first-child) {
+        width: 16%;
+    }
+    
+    #courses {
+      width: 50%;
+      height: 100px;
+    }
+
+    @media print {
+      #courses, #ok, #example {
+        visibility: hidden;
+      }
+      
+      #printArea {
+          position: absolute;
+          left: 0;
+          top: 0;
+      }
+    }
+    
+    </style>
+    
+
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.0.js"></script>
+    <script type="text/javascript">
+    
+    $(document).ready(function(){
+
+        var rows = $("#tableBody").children("tr");
+
+        $("#ok").click(function(){
+            var lines = $("#courses").val().split('\n');
+
+            for (var lineIndex = 0; lineIndex < lines.length; lineIndex++){
+                var data = lines[lineIndex].split(",");
+                // coursename, location, time, instructor
+                // Advanced Programming Languages,EECS資電 127,M5M6M7,李政崑
+
+                var coursename = data[0].trim();
+                var place = data[1].trim();
+                var timeslot = data[2].trim();
+                var professor = data[3].trim(); 
+                var dayIndexMap = {M : 1, T: 2, W: 3, R:4, F:5, S:6};
+
+                for (var i = 0; i < timeslot.length; i+=2){
+                    var dayCode = timeslot[i];
+                    var timeCode = timeslot[i+1];
+
+                    var timeIndex;
+                    if (timeCode == 'n'){
+                        timeIndex = 4;
+                    }
+                    else if (timeCode == 'a'){
+                        timeIndex = 10;
+                    }
+                    else if (timeCode == 'b'){
+                        timeIndex = 11;
+                    }
+                    else if (timeCode == 'c'){
+                        timeIndex = 12;
+                    } else {
+                        timeCode = parseInt(timeCode);
+                        timeIndex = (timeCode <= 4) ? (timeCode - 1) : timeCode;
+                    }
+
+
+                    // paint
+                    var dayIndex = dayIndexMap[dayCode];
+                    var timeArea = $(rows[timeIndex]).children("td:eq(" + dayIndex + ")");
+                    
+                    
+                    var content = data + "(" + dayCode + timeCode + ")";
+                    if(timeArea.text() == ''){
+                      timeArea.text(content);
+                      timeArea.addClass("timeslot");
+                    }
+                    else {
+                      timeArea.text(content + timeArea.text());
+                      timeArea.removeClass("timeslot").addClass("collision")
+                    }
+                }
+
+            }
+
+        });
+
+
+    });
+    </script>
+
+    <body>
+
+        <!-- >      
+            <pre>
+
+  week
+
+  M	星期一   Monday
+  T	星期二   Tuesday
+  W	星期三   Wednesday
+  R	星期四   Thursday
+  F	星期五   Friday
+  S	星期六   Saturday
+
+  period
+
+  1	第 1 節  Class One	08:00 -- 08:50
+  2	第 2 節  Class Two	09:00 -- 09:50
+  3	第 3 節  Class Three	10:10 -- 11:00
+  4	第 4 節  Class Four	11:10 -- 12:00
+  n	第 n 節  Noon Class	12:10 -- 13:00
+  5	第 5 節  Class Five	13:20 -- 14:10
+  6	第 6 節  Class Six	14:20 -- 15:10
+  7	第 7 節  Class Seven	15:30 -- 16:20
+  8	第 8 節  Class Eight	16:30 -- 17:20
+  9	第 9 節  Class Nine	17:30 -- 18:20
+  a	第 a 節  Evening Class-One	18:30 -- 19:20
+  b	第 b 節  Evening Class-Two	19:30 -- 20:20
+  c	第 c 節  Evening Class-Three	20:30 -- 21:20
+
+
+            </pre>
+            -->
+            
+            <pre id="example">
+              輸入例子:
+              Network Programming,EECS資電 326,MaMbMc,陳柏諭
+              Formal Language,DELTA台達104 127,W3W4F3,何宗易
+              Compiler Design,DELTA台達108,T7T8R7,李政崑
+              User experience design,EDU教 316,WnW5W6,許有真
+            </pre>
+            <textarea id="courses"></textarea><br>
+            <button id="ok">OK</button>
+
+
+<div id="printArea">
+            <table border="1">
+                <thead>
+                    <tr>
+                        <td>time</td>
+                        <td>Monday</td> 
+                        <td>Tuseday</td>
+                        <td>Wednesday</td>
+                        <td>Thursday</td> 
+                        <td>Friday</td>
+                        <td>Saturday</td>
+                    </tr>
+                </thead>
+
+                <tbody id="tableBody">
+                    <tr>
+                        <td>08:00 -- 08:50</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>09:00 -- 09:50</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>10:10 -- 11:00</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>11:10 -- 12:00</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>12:10 -- 13:00</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>13:20 -- 14:10</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>14:20 -- 15:10</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td>15:30 -- 16:20</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td>16:30 -- 17:20</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td>17:30 -- 18:20</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td>18:30 -- 19:20</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td>19:30 -- 20:20</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td>20:30 -- 21:20</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                </tbody>
+            </table>
+          </div>
+    </body>
+</head>
