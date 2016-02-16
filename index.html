@@ -51,8 +51,7 @@
     <script type="text/javascript" src="BlockReader.js"></script>
     <script type="text/javascript">
     
-    function csvMode(rows){
-      var lines = $("#courses").val().split('\n');
+    function csvMode(rows, lines){
       for (var lineIndex = 0; lineIndex < lines.length; lineIndex++){
          var data = lines[lineIndex].split(",");
          paintCourse(data, rows);
@@ -95,19 +94,13 @@
       以加簽方式選課
       0 
     */      
-    function blocktextMode(rows){
-      var lines = $("#courses").val().split('\n');
+    function blocktextMode(rows, lines){
       var blockReader = new BlockReader(lines);
       
       while (blockReader.next()){
         var courseBlock = blockReader.nextBlock();
         var locationBlock = blockReader.nextBlock();
         var professorBlock = blockReader.nextBlock();
-        
-        console.log(courseBlock);
-        console.log(locationBlock);
-        console.log(professorBlock);
-        
         
         var courseName = courseBlock[1];
         var timeslot = (courseBlock.length == 6) ? (courseBlock[4].trim() + courseBlock[5].trim()) : courseBlock[4];
@@ -184,14 +177,16 @@
 
         $("#ok").click(function(){
           var rows = $("#tableBody").children("tr");
-          
+          var lines = $("#courses").val().split('\n');
           var selectedMode =  $('input:radio[name="mode"]:checked').val();
           
           if (selectedMode === 'csv'){
-            csvMode(rows);
+            csvMode(rows, lines);
           } else {
-            blocktextMode(rows);
+            blocktextMode(rows, lines);
           }
+          
+          $("#courses").val('');
         });
     });
     </script>
