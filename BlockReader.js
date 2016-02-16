@@ -11,7 +11,7 @@ function BlockReader(lines){
     // remove empty line between block
     // pointing to first non-empty line on the next block
     do {
-      if (lines[counter] == ''){
+      if (lines[counter].trim() == ''){
         counter++;
       } else {
         head = counter;
@@ -26,7 +26,7 @@ function BlockReader(lines){
       // examing how long the block is until reading empty line
       do {
         counter++;
-      } while ( (this.next()) && (lines[counter] != undefined) && (lines[counter] != '') );
+      } while ( (this.next()) && (lines[counter] != undefined) && (lines[counter].trim() != '') );
       
       return lines.slice(head, counter);
     }

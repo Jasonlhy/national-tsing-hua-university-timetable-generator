@@ -32,7 +32,7 @@
     }
 
     @media print {
-      #courses, #ok, #example {
+      #courses, #ok, #csv_example, #blocktext_example{
         visibility: hidden;
       }
       
@@ -51,72 +51,148 @@
     <script type="text/javascript" src="BlockReader.js"></script>
     <script type="text/javascript">
     
+    function csvMode(rows){
+      var lines = $("#courses").val().split('\n');
+      for (var lineIndex = 0; lineIndex < lines.length; lineIndex++){
+         var data = lines[lineIndex].split(",");
+         paintCourse(data, rows);
+      }
+    }
     
-    function BlockReader(){
-        this.jas
+    /* Based on this structure
+      10420CS 135601
+      計算機程式設計二
+      Introduction to Programming (II)
+      3 
+      T5T6
+      F5F6
+
+      DELTA台達103
+      ／容量121
+      CC計中電一
+      ／容量40
+
+      李哲榮
+      LEE, CHE-RUNG 
+      60 
+      F5F6計中電腦教室I & II。本課程上150分鐘，其餘時間由教授視情況彈性運用。
+      資工系大學部1年級優先，第3次選課起開放全校修習
+      (跨院系)積體電路設計學分學程/(跨院系)全球供應鏈與運籌管理學分學程/(跨院系)資訊傳媒學分學程
+      60 
+    
+      10420CS 750000
+      計算機圖學專題
+      Special Topics in Computer Graphics
+      2 
+      T6T7
+ 
+      EECS資電 125
+      ／容量55
+ 
+      朱宏國
+      CHU, HUNG-KUO 
+      0 
+      以加簽方式選課
+      0 
+    */      
+    function blocktextMode(rows){
+      var lines = $("#courses").val().split('\n');
+      var blockReader = new BlockReader(lines);
+      
+      while (blockReader.next()){
+        var courseBlock = blockReader.nextBlock();
+        var locationBlock = blockReader.nextBlock();
+        var professorBlock = blockReader.nextBlock();
+        
+        console.log(courseBlock);
+        console.log(locationBlock);
+        console.log(professorBlock);
+        
+        
+        var courseName = courseBlock[1];
+        var timeslot = (courseBlock.length == 6) ? (courseBlock[4].trim() + courseBlock[5].trim()) : courseBlock[4];
+        var courseLocation = locationBlock[0];
+        var professorName = professorBlock[0];
+        
+        var data = [courseName, courseLocation, timeslot, professorName];
+        paintCourse(data, rows);
+      }
+    }
+    
+    function paintCourse(data, rows){
+
+      // coursename, location, time, instructor
+      // Advanced Programming Languages,EECS資電 127,M5M6M7,李政崑
+
+      var coursename = data[0].trim();
+      var place = data[1].trim();
+      var timeslot = data[2].trim();
+      var professor = data[3].trim(); 
+      var dayIndexMap = {M : 1, T: 2, W: 3, R:4, F:5, S:6};
+
+      for (var i = 0; i < timeslot.length; i+=2){
+          var dayCode = timeslot[i];
+          var timeCode = timeslot[i+1];
+
+          var timeIndex;
+          if (timeCode == 'n'){
+              timeIndex = 4;
+          }
+          else if (timeCode == 'a'){
+              timeIndex = 10;
+          }
+          else if (timeCode == 'b'){
+              timeIndex = 11;
+          }
+          else if (timeCode == 'c'){
+              timeIndex = 12;
+          } else {
+              timeCode = parseInt(timeCode);
+              timeIndex = (timeCode <= 4) ? (timeCode - 1) : timeCode;
+          }
+
+          // paint
+          var dayIndex = dayIndexMap[dayCode];
+          var timeArea = $(rows[timeIndex]).children("td:eq(" + dayIndex + ")");
+          
+          
+          var content = data + "(" + dayCode + timeCode + ")";
+          if(timeArea.text() == ''){
+            timeArea.text(content);
+            timeArea.addClass("timeslot");
+          }
+          else {
+            timeArea.text(content + timeArea.text());
+            timeArea.removeClass("timeslot").addClass("collision")
+          }
+      }
     }
     
     $(document).ready(function(){
-
-        var rows = $("#tableBody").children("tr");
+      $("#blocktext_example").hide();
+    
+      $('input:radio[name="mode"]').change(
+          function(){
+              if ($(this).is(':checked') && $(this).val() == 'blocktext') {
+                $("#csv_example").hide();
+                $("#blocktext_example").show();
+              } else if ($(this).is(':checked') && $(this).val() == 'csv') {
+                $("#csv_example").show();
+                $("#blocktext_example").hide();
+              }
+          });
 
         $("#ok").click(function(){
-            var lines = $("#courses").val().split('\n');
-
-            for (var lineIndex = 0; lineIndex < lines.length; lineIndex++){
-                var data = lines[lineIndex].split(",");
-                // coursename, location, time, instructor
-                // Advanced Programming Languages,EECS資電 127,M5M6M7,李政崑
-
-                var coursename = data[0].trim();
-                var place = data[1].trim();
-                var timeslot = data[2].trim();
-                var professor = data[3].trim(); 
-                var dayIndexMap = {M : 1, T: 2, W: 3, R:4, F:5, S:6};
-
-                for (var i = 0; i < timeslot.length; i+=2){
-                    var dayCode = timeslot[i];
-                    var timeCode = timeslot[i+1];
-
-                    var timeIndex;
-                    if (timeCode == 'n'){
-                        timeIndex = 4;
-                    }
-                    else if (timeCode == 'a'){
-                        timeIndex = 10;
-                    }
-                    else if (timeCode == 'b'){
-                        timeIndex = 11;
-                    }
-                    else if (timeCode == 'c'){
-                        timeIndex = 12;
-                    } else {
-                        timeCode = parseInt(timeCode);
-                        timeIndex = (timeCode <= 4) ? (timeCode - 1) : timeCode;
-                    }
-
-
-                    // paint
-                    var dayIndex = dayIndexMap[dayCode];
-                    var timeArea = $(rows[timeIndex]).children("td:eq(" + dayIndex + ")");
-                    
-                    
-                    var content = data + "(" + dayCode + timeCode + ")";
-                    if(timeArea.text() == ''){
-                      timeArea.text(content);
-                      timeArea.addClass("timeslot");
-                    }
-                    else {
-                      timeArea.text(content + timeArea.text());
-                      timeArea.removeClass("timeslot").addClass("collision")
-                    }
-                }
-
-            }
-
+          var rows = $("#tableBody").children("tr");
+          
+          var selectedMode =  $('input:radio[name="mode"]:checked').val();
+          
+          if (selectedMode === 'csv'){
+            csvMode(rows);
+          } else {
+            blocktextMode(rows);
+          }
         });
-
-
     });
     </script>
 
@@ -154,15 +230,60 @@
             </pre>
             -->
             
-            <pre id="example">
+            <pre id="csv_example">
               輸入例子:
               Network Programming,EECS資電 326,MaMbMc,陳柏諭
               Formal Language,DELTA台達104 127,W3W4F3,何宗易
               Compiler Design,DELTA台達108,T7T8R7,李政崑
               User experience design,EDU教 316,WnW5W6,許有真
             </pre>
+            
+            <pre id="blocktext_example">
+              輸入例子:
+              10420CS 135601
+              計算機程式設計二
+              Introduction to Programming (II)
+              3 
+              T5T6
+              F5F6
+ 
+              DELTA台達103
+              ／容量121
+              CC計中電一
+              ／容量40
+ 
+              李哲榮
+              LEE, CHE-RUNG 
+              60 
+              F5F6計中電腦教室I & II。本課程上150分鐘，其餘時間由教授視情況彈性運用。
+              資工系大學部1年級優先，第3次選課起開放全校修習
+              (跨院系)積體電路設計學分學程/(跨院系)全球供應鏈與運籌管理學分學程/(跨院系)資訊傳媒學分學程
+              60 
+              
+              10420CS 750000
+              計算機圖學專題
+              Special Topics in Computer Graphics
+              2 
+              T6T7
+ 
+              EECS資電 125
+              ／容量55
+ 
+              朱宏國
+              CHU, HUNG-KUO 
+              0 
+              以加簽方式選課
+              0
+            </pre>
+            
+            
             <textarea id="courses"></textarea><br>
+            
             <button id="ok">OK</button>
+            <div id="selectMode">
+              <input type="radio" name="mode" value="csv" checked="checked">CSV<br>
+              <input type="radio" name="mode" value="blocktext">Block Text<br>
+            </div>
 
 
 <div id="printArea">
